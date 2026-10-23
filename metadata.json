@@ -1,0 +1,6 @@
+{
+  "name": "SoundVibe - Spotify & DJ YouTube Music Studio",
+  "description": "Ad-free Spotify-style music streaming from YouTube with offline caching, RaveDJ mashups, DJ mixer decks, seamless crossfade, and AI 50+ playlist generation.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
