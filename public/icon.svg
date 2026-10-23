@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0a0a0f"/>
+      <stop offset="100%" stop-color="#181824"/>
+    </linearGradient>
+    <linearGradient id="neon" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1db954"/>
+      <stop offset="50%" stop-color="#10b981"/>
+      <stop offset="100%" stop-color="#34d399"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#a855f7"/>
+      <stop offset="100%" stop-color="#ec4899"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="512" height="512" rx="128" fill="url(#bg)"/>
+
+  <!-- Outer Vinyl Grooves -->
+  <circle cx="256" cy="256" r="190" fill="none" stroke="#222230" stroke-width="6"/>
+  <circle cx="256" cy="256" r="160" fill="none" stroke="#2a2a3c" stroke-width="4"/>
+  <circle cx="256" cy="256" r="130" fill="none" stroke="#333348" stroke-width="3"/>
+
+  <!-- Glowing Turntable Ring -->
+  <circle cx="256" cy="256" r="105" fill="none" stroke="url(#neon)" stroke-width="12" stroke-dasharray="14 8"/>
+
+  <!-- Center Vinyl Label -->
+  <circle cx="256" cy="256" r="80" fill="#121216" stroke="url(#neon)" stroke-width="4"/>
+
+  <!-- Soundwave Bars & Equalizer -->
+  <rect x="206" y="226" width="10" height="60" rx="5" fill="url(#neon)"/>
+  <rect x="226" y="206" width="10" height="100" rx="5" fill="url(#neon)"/>
+  <rect x="246" y="186" width="10" height="140" rx="5" fill="url(#accent)"/>
+  <rect x="266" y="196" width="10" height="120" rx="5" fill="url(#neon)"/>
+  <rect x="286" y="216" width="10" height="80" rx="5" fill="url(#neon)"/>
+  <rect x="306" y="236" width="10" height="40" rx="5" fill="url(#neon)"/>
+
+  <!-- Center Spindle Hole -->
+  <circle cx="256" cy="256" r="12" fill="#000000" stroke="#ffffff" stroke-width="2"/>
+</svg>

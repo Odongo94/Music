@@ -51,6 +51,9 @@ export const PlayerBar: React.FC = () => {
     setIsLyricsModalOpen,
     currentView,
     setCurrentView,
+    playbackSource,
+    setPlaybackSource,
+    showToast,
   } = useMusic();
 
   const [isHoveringSeek, setIsHoveringSeek] = useState(false);
@@ -105,10 +108,24 @@ export const PlayerBar: React.FC = () => {
               <span className="text-[11px] text-zinc-400 truncate hover:underline cursor-pointer">
                 {currentTrack.artist}
               </span>
-              <div className="flex items-center gap-2 mt-0.5 text-[10px] text-zinc-400">
-                <span>{currentTrack.bpm} BPM</span>
-                <span>•</span>
-                <span>{currentTrack.genre}</span>
+              <div className="flex items-center gap-1.5 mt-0.5">
+                <button
+                  onClick={() => {
+                    const next = playbackSource === 'youtube' ? 'spotify' : 'youtube';
+                    setPlaybackSource(next);
+                    showToast(`Switched streaming audio source to ${next.toUpperCase()}`);
+                  }}
+                  className={`text-[9px] font-bold px-1.5 py-0.5 rounded transition-all cursor-pointer flex items-center gap-1 ${
+                    playbackSource === 'youtube'
+                      ? 'bg-red-600/30 text-red-300 border border-red-500/40'
+                      : 'bg-[#1db954]/30 text-[#1db954] border border-[#1db954]/40'
+                  }`}
+                  title="Click to toggle streaming between YouTube and Spotify"
+                >
+                  <span className={`w-1.5 h-1.5 rounded-full ${playbackSource === 'youtube' ? 'bg-red-400' : 'bg-[#1db954]'}`} />
+                  {playbackSource === 'youtube' ? 'YouTube HD' : 'Spotify'}
+                </button>
+                <span className="text-[10px] text-zinc-500 font-mono">{currentTrack.bpm} BPM</span>
               </div>
             </div>
 

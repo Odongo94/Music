@@ -86,3 +86,15 @@ export async function fetchSyncData(code: string): Promise<any> {
   const result = await response.json();
   return result.data;
 }
+
+export async function searchLiveMusic(query: string, source: 'all' | 'youtube' | 'spotify' = 'all'): Promise<{ tracks: Track[]; directMatch?: boolean }> {
+  const response = await fetch('/api/music/search', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ query, source }),
+  });
+  if (!response.ok) {
+    throw new Error('Failed to search music');
+  }
+  return response.json();
+}

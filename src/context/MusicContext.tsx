@@ -3,6 +3,7 @@ import { Track, Playlist, Genre, Mood, ThemeMode, SleepTimerState, DJDeckState, 
 import { INITIAL_TRACKS, INITIAL_PLAYLISTS } from '../data/mockTracks';
 import { offlineStorage } from '../services/offlineStorage';
 import { djAudio } from '../services/djAudioEngine';
+import { searchLiveMusic } from '../services/geminiClient';
 
 declare global {
   interface Window {
@@ -23,6 +24,15 @@ interface MusicContextType {
   setSelectedMood: (mood: Mood) => void;
   searchQuery: string;
   setSearchQuery: (query: string) => void;
+
+  // Search Engine & Sources (YouTube + Spotify)
+  playbackSource: 'youtube' | 'spotify';
+  setPlaybackSource: (source: 'youtube' | 'spotify') => void;
+  searchSource: 'all' | 'youtube' | 'spotify';
+  setSearchSource: (source: 'all' | 'youtube' | 'spotify') => void;
+  searchResults: Track[];
+  isSearchingLive: boolean;
+  executeLiveSearch: (query?: string) => Promise<void>;
 
   // Track & Playback
   currentTrack: Track | null;
@@ -95,11 +105,17 @@ interface MusicContextType {
   setIsShareModalOpen: (open: boolean) => void;
   isLyricsModalOpen: boolean;
   setIsLyricsModalOpen: (open: boolean) => void;
+  isInstallModalOpen: boolean;
+  setIsInstallModalOpen: (open: boolean) => void;
   showDJConsole: boolean;
   setShowDJConsole: (show: boolean) => void;
 
   // Full catalog
   allTracks: Track[];
+
+  // Toast feedback
+  toastMessage: string | null;
+  showToast: (msg: string) => void;
 }
 
 const MusicContext = createContext<MusicContextType | undefined>(undefined);
@@ -111,6 +127,12 @@ export const MusicProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [selectedGenre, setSelectedGenre] = useState<Genre>('All');
   const [selectedMood, setSelectedMood] = useState<Mood>('All');
   const [searchQuery, setSearchQuery] = useState('');
+
+  // Source & Live Search States (YouTube + Spotify)
+  const [playbackSource, setPlaybackSource] = useState<'youtube' | 'spotify'>('youtube');
+  const [searchSource, setSearchSource] = useState<'all' | 'youtube' | 'spotify'>('all');
+  const [searchResults, setSearchResults] = useState<Track[]>(INITIAL_TRACKS);
+  const [isSearchingLive, setIsSearchingLive] = useState(false);
 
   // Track & Queue State
   const [allTracks, setAllTracks] = useState<Track[]>(INITIAL_TRACKS);
@@ -185,7 +207,20 @@ export const MusicProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [isAiModalOpen, setIsAiModalOpen] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [isLyricsModalOpen, setIsLyricsModalOpen] = useState(false);
+  const [isInstallModalOpen, setIsInstallModalOpen] = useState(false);
   const [showDJConsole, setShowDJConsole] = useState(false);
+
+  // Toast feedback
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const toastTimeoutRef = useRef<number | null>(null);
+
+  const showToast = (msg: string) => {
+    setToastMessage(msg);
+    if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
+    toastTimeoutRef.current = window.setTimeout(() => {
+      setToastMessage(null);
+    }, 3500);
+  };
 
   // YouTube Iframe Players Refs
   const playerARef = useRef<any>(null);
@@ -420,6 +455,47 @@ export const MusicProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       if (deck === activeDeck && !isMashupPlaying) {
         setIsPlaying(false);
       }
+    }
+  };
+
+  // Live Search Execution (YouTube & Spotify)
+  const executeLiveSearch = async (queryText?: string) => {
+    const term = (queryText !== undefined ? queryText : searchQuery).trim();
+    if (!term) {
+      setSearchResults(allTracks);
+      return;
+    }
+
+    setIsSearchingLive(true);
+    try {
+      const data = await searchLiveMusic(term, searchSource);
+      if (data && data.tracks && data.tracks.length > 0) {
+        setSearchResults(data.tracks);
+        // Also add new tracks to allTracks catalog if not present
+        setAllTracks((prev) => {
+          const map = new Map(prev.map((t) => [t.id, t]));
+          data.tracks.forEach((t) => map.set(t.id, t));
+          return Array.from(map.values());
+        });
+
+        if (data.directMatch && data.tracks[0]) {
+          playTrack(data.tracks[0]);
+          showToast(`Now playing: ${data.tracks[0].title}`);
+        } else {
+          showToast(`Found ${data.tracks.length} tracks matching "${term}"`);
+        }
+      }
+    } catch (err) {
+      console.warn('Search live error:', err);
+      const local = allTracks.filter(
+        (t) =>
+          t.title.toLowerCase().includes(term.toLowerCase()) ||
+          t.artist.toLowerCase().includes(term.toLowerCase()) ||
+          t.genre.toLowerCase().includes(term.toLowerCase())
+      );
+      setSearchResults(local);
+    } finally {
+      setIsSearchingLive(false);
     }
   };
 
@@ -738,18 +814,26 @@ export const MusicProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   // Offline Mode & Downloads
   const toggleOfflineMode = () => {
-    setIsOfflineMode((prev) => !prev);
-    if (!isOfflineMode) {
-      djAudio.playVoiceDrop('Offline Mode Enabled');
-    }
+    setIsOfflineMode((prev) => {
+      const nextState = !prev;
+      if (nextState) {
+        djAudio.playVoiceDrop('Offline Mode Enabled');
+        showToast('⚡ Offline Mode ON: Streaming songs directly from local storage');
+      } else {
+        showToast('🌐 Online Stream active: Ad-free high definition');
+      }
+      return nextState;
+    });
   };
 
   const toggleLikeTrack = async (trackId: string) => {
     const isNowLiked = await offlineStorage.toggleLikedSong(trackId);
     if (isNowLiked) {
       setLikedTrackIds((prev) => [...prev, trackId]);
+      showToast('Added to Liked Songs');
     } else {
       setLikedTrackIds((prev) => prev.filter((id) => id !== trackId));
+      showToast('Removed from Liked Songs');
     }
   };
 
@@ -759,6 +843,7 @@ export const MusicProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       const exists = prev.some((t) => t.id === track.id);
       return exists ? prev : [...prev, { ...track, isDownloaded: true }];
     });
+    showToast(`✓ Downloaded "${track.title}" to local storage for offline playback`);
   };
 
   const downloadPlaylistForOffline = async (playlist: Playlist) => {
@@ -771,6 +856,7 @@ export const MusicProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     const allDownloaded = await offlineStorage.getAllDownloadedTracks();
     setDownloadedTracks(allDownloaded);
     djAudio.playVoiceDrop('Playlist Downloaded for Offline');
+    showToast(`✓ Downloaded ${playlist.tracks.length} tracks in "${playlist.name}" for offline listening`);
   };
 
   const createCustomPlaylist = (name: string, description = '', tracks: Track[] = []): Playlist => {
@@ -885,6 +971,13 @@ export const MusicProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         setSelectedMood,
         searchQuery,
         setSearchQuery,
+        playbackSource,
+        setPlaybackSource,
+        searchSource,
+        setSearchSource,
+        searchResults,
+        isSearchingLive,
+        executeLiveSearch,
         currentTrack,
         nextTrack,
         queue,
@@ -943,9 +1036,13 @@ export const MusicProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         setIsShareModalOpen,
         isLyricsModalOpen,
         setIsLyricsModalOpen,
+        isInstallModalOpen,
+        setIsInstallModalOpen,
         showDJConsole,
         setShowDJConsole,
         allTracks,
+        toastMessage,
+        showToast,
       }}
     >
       {children}

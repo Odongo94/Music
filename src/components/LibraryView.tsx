@@ -131,6 +131,28 @@ export const LibraryView: React.FC = () => {
         </div>
       )}
 
+      {/* Download Instructions Guide */}
+      <div className="p-4 rounded-2xl bg-gradient-to-r from-emerald-950/40 via-zinc-900 to-zinc-900 border border-emerald-500/20 shadow-md">
+        <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-emerald-400 mb-2">
+          <Download className="w-4 h-4" />
+          <span>How to Download for Offline Listening</span>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs text-zinc-300">
+          <div className="p-2.5 rounded-xl bg-zinc-950/60 border border-white/5">
+            <span className="font-bold text-white block mb-0.5">1. Download Any Track</span>
+            Click the <Download className="w-3.5 h-3.5 inline mx-1 text-emerald-400" /> icon next to any song title or in the bottom playback bar.
+          </div>
+          <div className="p-2.5 rounded-xl bg-zinc-950/60 border border-white/5">
+            <span className="font-bold text-white block mb-0.5">2. Download Full Playlist</span>
+            Open any playlist and click the <span className="font-semibold text-emerald-400">"Download for Offline"</span> button in the action bar.
+          </div>
+          <div className="p-2.5 rounded-xl bg-zinc-950/60 border border-white/5">
+            <span className="font-bold text-white block mb-0.5">3. Switch to Offline Mode</span>
+            Toggle the <span className="font-semibold text-amber-300">"Offline Mode"</span> switch in the sidebar or top bar to play without internet.
+          </div>
+        </div>
+      </div>
+
       {/* 2. Downloaded Offline Tracks Section */}
       {(activeTab === 'all' || activeTab === 'downloads') && (
         <div>

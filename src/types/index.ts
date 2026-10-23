@@ -25,6 +25,10 @@ export type Mood =
 export interface Track {
   id: string;
   youtubeId: string;
+  spotifyId?: string;
+  spotifyUrl?: string;
+  audioPreviewUrl?: string;
+  source?: 'youtube' | 'spotify' | 'dual';
   title: string;
   artist: string;
   album: string;

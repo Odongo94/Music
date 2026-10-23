@@ -13,9 +13,10 @@ import { AIPlaylistGeneratorModal } from './components/AIPlaylistGeneratorModal'
 import { ShareModal } from './components/ShareModal';
 import { SleepTimerModal } from './components/SleepTimerModal';
 import { LyricsModal } from './components/LyricsModal';
+import { InstallAppModal } from './components/InstallAppModal';
 
 const AppContent: React.FC = () => {
-  const { currentView, theme } = useMusic();
+  const { currentView, theme, toastMessage, isInstallModalOpen, setIsInstallModalOpen } = useMusic();
   const [isSleepModalOpen, setIsSleepModalOpen] = useState(false);
 
   // Background and theme container styling
@@ -52,9 +53,18 @@ const AppContent: React.FC = () => {
       {/* Spotify Bottom Sticky Player Bar */}
       <PlayerBar />
 
+      {/* Floating Toast Notification */}
+      {toastMessage && (
+        <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-50 px-4 py-2.5 rounded-full bg-zinc-900/95 border border-[#1db954]/50 shadow-2xl text-xs font-semibold text-white flex items-center gap-2 backdrop-blur-md animate-fade-in">
+          <span className="w-2 h-2 rounded-full bg-[#1db954] animate-ping" />
+          <span>{toastMessage}</span>
+        </div>
+      )}
+
       {/* Modals */}
       <AIPlaylistGeneratorModal />
       <ShareModal />
+      <InstallAppModal isOpen={isInstallModalOpen} onClose={() => setIsInstallModalOpen(false)} />
       <SleepTimerModal isOpen={isSleepModalOpen} onClose={() => setIsSleepModalOpen(false)} />
       <LyricsModal />
     </div>

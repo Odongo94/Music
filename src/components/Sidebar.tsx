@@ -14,6 +14,7 @@ import {
   Radio,
   Clock,
   WifiOff,
+  Smartphone,
 } from 'lucide-react';
 import { useMusic } from '../context/MusicContext';
 
@@ -30,6 +31,7 @@ export const Sidebar: React.FC = () => {
     toggleOfflineMode,
     setIsAiModalOpen,
     setIsShareModalOpen,
+    setIsInstallModalOpen,
     setSleepTimer,
     sleepTimer,
     createCustomPlaylist,
@@ -260,6 +262,19 @@ export const Sidebar: React.FC = () => {
 
       {/* Footer Utilities */}
       <div className="p-3 border-t border-white/5 space-y-1 bg-black/60">
+        <button
+          onClick={() => setIsInstallModalOpen(true)}
+          className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-semibold text-black bg-[#1db954] hover:bg-emerald-400 transition-all shadow-md cursor-pointer"
+        >
+          <div className="flex items-center gap-2">
+            <Smartphone className="w-3.5 h-3.5 text-black" />
+            <span>Install on Phone</span>
+          </div>
+          <span className="text-[10px] font-bold uppercase bg-black/20 text-black px-1.5 py-0.5 rounded">
+            APP
+          </span>
+        </button>
+
         <button
           onClick={() => setIsShareModalOpen(true)}
           className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium text-zinc-300 hover:text-white hover:bg-zinc-900 transition-colors"
